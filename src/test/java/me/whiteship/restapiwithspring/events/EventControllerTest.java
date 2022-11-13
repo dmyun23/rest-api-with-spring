@@ -1,5 +1,6 @@
 package me.whiteship.restapiwithspring.events;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.print.attribute.standard.Media;
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 
@@ -66,12 +68,15 @@ public class EventControllerTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("free").value(false))
+//                .andExpect(jsonPath("offline").value(false))
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
 //                .andExpect(status().isBadRequest())
         ;
 
     }
     @Test
-    public void createEvent_Bad() throws Exception {
+    public void createEvent_Bad_Request() throws Exception {
 
         Event event = Event.builder()
                 .name("Spring")
@@ -99,7 +104,17 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
         ;
+    }
 
+    @Test
+    public void createEvent_Bad_Request_Empty_Input() throws Exception {
+        EventDto eventDto = EventDto.builder().build();
+
+        this.mockMvc.perform(post("/api/events")
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .content(this.objectMapper.writeValueAsString(eventDto)))
+                .andExpect(status().isBadRequest())
+       ;
     }
 
 }
