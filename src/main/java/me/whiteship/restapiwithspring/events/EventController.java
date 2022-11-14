@@ -33,11 +33,15 @@ public class EventController {
     public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors){
 
         if(errors.hasErrors()){
-            return ResponseEntity.badRequest().build();
+//            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);   // runtime 시 오류. serializer 시 오류.
+                                                                // 하단에 newEvent는 javabean 스펙에 따라 class 등록. but Errors 는 javabean 스펙에 맞지 않아서.
+                                                                // 그래서 ErrorsSerializer 를 objectMapper에 등록
         }
         eventValidator.validate(eventDto, errors);
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+//            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 //        Event event = Event.builder()
 //                .name(eventDto.getName())
