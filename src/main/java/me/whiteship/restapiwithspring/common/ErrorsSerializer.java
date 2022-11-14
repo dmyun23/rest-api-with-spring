@@ -1,4 +1,4 @@
-package me.whiteship.restapiwithspring.events;
+package me.whiteship.restapiwithspring.common;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
