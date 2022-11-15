@@ -2,16 +2,19 @@ package me.whiteship.restapiwithspring.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.whiteship.restapiwithspring.common.RestDocsConfiguration;
 import me.whiteship.restapiwithspring.common.TestDescription;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,6 +25,11 @@ import javax.print.attribute.standard.Media;
 import java.time.LocalDateTime;
 import java.util.regex.Matcher;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 //@WebMvcTest  // 웹과 관련된 빈들이 모두 등록됨
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestDocsConfiguration.class)
 public class EventControllerTest {
 
     @Autowired
@@ -71,9 +81,58 @@ public class EventControllerTest {
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("free").value(false))
-//                .andExpect(jsonPath("offline").value(false))
+                .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
-//                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.update-event").exists())
+                .andDo(document("create-event",
+                            links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("query-events").description("link to query events"),
+                                linkWithRel("update-event").description("link to update an existing event")
+                            ),
+                           requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                           ),
+                           requestFields(
+                                fieldWithPath("name").description("Name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin of evnent"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close of evnent"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin of new evnent"),
+                                fieldWithPath("endEventDateTime").description("date time of end of new evnent"),
+                                fieldWithPath("location").description("location of new event"),
+                                fieldWithPath("basePrice").description("base price of new event"),
+                                fieldWithPath("maxPrice").description("max price of new event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of enrolment")
+                           ),
+                            responseHeaders(
+                                    headerWithName(HttpHeaders.LOCATION).description("Location header"),
+                                    headerWithName(HttpHeaders.CONTENT_TYPE).description("Content type header")
+                            ),
+//                            relaxedResponseFields(  // relaxed prefix를 사용하여
+                            responseFields(  // relaxed prefix를 사용하여
+                                    fieldWithPath("id").description("identifier of new event"),
+                                    fieldWithPath("name").description("Name of new event"),
+                                    fieldWithPath("description").description("description of new event"),
+                                    fieldWithPath("beginEnrollmentDateTime").description("date time of begin of evnent"),
+                                    fieldWithPath("closeEnrollmentDateTime").description("date time of close of evnent"),
+                                    fieldWithPath("beginEventDateTime").description("date time of begin of new evnent"),
+                                    fieldWithPath("endEventDateTime").description("date time of end of new evnent"),
+                                    fieldWithPath("location").description("location of new event"),
+                                    fieldWithPath("basePrice").description("base price of new event"),
+                                    fieldWithPath("maxPrice").description("max price of new event"),
+                                    fieldWithPath("limitOfEnrollment").description("limit of enrolment"),
+                                    fieldWithPath("free").description("it tells is this event is free or not"),
+                                    fieldWithPath("offline").description("it tells is this event is offline meeting or not"),
+                                    fieldWithPath("eventStatus").description("event status"),
+                                    fieldWithPath("_links.self.href").description("link to href"),
+                                    fieldWithPath("_links.query-events.href").description("link to query event list"),
+                                    fieldWithPath("_links.update-event.href").description("link to update existing event")
+                            )
+                        ))
         ;
 
     }
