@@ -1,6 +1,8 @@
-package me.whiteship.restapiwithspring.events;
+package me.whiteship.restapiwithspring.common;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import me.whiteship.restapiwithspring.events.Event;
+import me.whiteship.restapiwithspring.events.EventController;
 import org.springframework.hateoas.RepresentationModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
