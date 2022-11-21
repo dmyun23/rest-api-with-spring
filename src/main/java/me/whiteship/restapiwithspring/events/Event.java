@@ -1,6 +1,7 @@
 package me.whiteship.restapiwithspring.events;
 
 import lombok.*;
+import me.whiteship.restapiwithspring.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -28,6 +29,8 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus=EventStatus.DRAFT;
 
+    @ManyToOne
+    private Account manager;
     public void update(){
         // Update free
         if(this.basePrice ==0 && this.maxPrice ==0) {
